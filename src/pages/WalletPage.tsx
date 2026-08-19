@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { TRANSACTIONS } from "../data";
+import { useTransactions } from "../hooks/useTransactions";
 import { Ic } from "../components/icons";
 import { TxRow } from "../components/TxRow";
 
 export default function WalletPage() {
   const navigate = useNavigate();
   const [vis, setVis] = useState(true);
-  const spent = TRANSACTIONS.filter((t) => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
+  const { data: transactions = [] } = useTransactions();
+  const spent = transactions.filter((t) => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0);
 
   return (
     <div className="flex flex-col" style={{ height: "100dvh" }}>
@@ -63,7 +64,7 @@ export default function WalletPage() {
           <div className="card-sm p-4">
             <p className="text-xs text-slate-400 mb-1">Lượt gửi xe</p>
             <p className="text-lg font-black text-blue-600 mono">
-              {TRANSACTIONS.filter((t) => t.type === "parking").length} lần
+              {transactions.filter((t) => t.type === "parking").length} lần
             </p>
           </div>
         </div>
@@ -96,8 +97,8 @@ export default function WalletPage() {
         </span>
       </div>
       <div className="flex-1 page-scroll bg-white pb-24">
-        {TRANSACTIONS.map((tx, i) => (
-          <TxRow key={tx.id} tx={tx} last={i === TRANSACTIONS.length - 1} />
+        {transactions.map((tx, i) => (
+          <TxRow key={tx.id} tx={tx} last={i === transactions.length - 1} />
         ))}
       </div>
     </div>

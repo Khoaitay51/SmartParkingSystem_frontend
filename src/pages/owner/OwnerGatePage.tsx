@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { OWNER_LOTS } from "../../data";
+import { useOwnerLots } from "../../hooks/useOwnerData";
 import { GateButton } from "../../components/GateButton";
+import { SkeletonList } from "../../components/Skeleton";
 
 const GATE_LOG = [
   { plate: "30A-123.45", action: "vào", time: "14:23", lot: "Mỹ Đình A", gate: "Cổng A" },
@@ -14,7 +15,17 @@ const GATE_LOG = [
 
 export default function OwnerGatePage() {
   const [selectedLot, setSelectedLot] = useState(0);
-  const lot = OWNER_LOTS[selectedLot];
+  const { data: ownerLots = [], isLoading } = useOwnerLots();
+  const lot = ownerLots[selectedLot];
+
+  if (isLoading || !lot) {
+    return (
+      <div className="flex flex-col" style={{ height: "100dvh" }}>
+        <div className="h-40 bg-slate-200 animate-pulse" />
+        <div className="p-4"><SkeletonList n={3} /></div>
+      </div>
+    );
+  }
 
   const logForLot = GATE_LOG.filter((g) =>
     lot.name.includes(g.lot.split(" ").pop()!)
@@ -51,7 +62,7 @@ export default function OwnerGatePage() {
         <div className="mx-4 mt-4">
           <p className="text-xs font-black text-slate-500 mb-2">CHỌN BÃI XE</p>
           <div className="flex gap-2 overflow-x-auto pb-1">
-            {OWNER_LOTS.map((l, i) => (
+            {ownerLots.map((l, i) => (
               <button
                 key={l.id}
                 className="flex-shrink-0 px-4 py-2.5 rounded-xl text-xs font-black tap"

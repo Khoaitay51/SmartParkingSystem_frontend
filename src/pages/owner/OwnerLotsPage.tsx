@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import type { OwnerLot } from "../../types";
-import { OWNER_LOTS } from "../../data";
+import { useOwnerLots } from "../../hooks/useOwnerData";
+import { SkeletonList } from "../../components/Skeleton";
 
 function fmt(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(".0", "") + "M₫";
@@ -78,7 +78,7 @@ function LotManageCard({ lot, onClick }: { lot: OwnerLot; onClick: () => void })
 
 export default function OwnerLotsPage() {
   const navigate = useNavigate();
-  const [lots] = useState(OWNER_LOTS);
+  const { data: lots = [], isLoading } = useOwnerLots();
 
   const openCount = lots.filter((l) => l.status === "open").length;
 
@@ -116,9 +116,12 @@ export default function OwnerLotsPage() {
 
       {/* Lots list */}
       <div className="flex-1 page-scroll px-4 pt-4 pb-28 space-y-4">
-        {lots.map((lot) => (
-          <LotManageCard key={lot.id} lot={lot} onClick={() => navigate("/owner/lots/" + lot.id)} />
-        ))}
+        {isLoading
+          ? <SkeletonList n={3} />
+          : lots.map((lot) => (
+              <LotManageCard key={lot.id} lot={lot} onClick={() => navigate("/owner/lots/" + lot.id)} />
+            ))
+        }
       </div>
 
       {/* FAB */}

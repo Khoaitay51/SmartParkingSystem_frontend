@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { GateButton } from "../../components/GateButton";
-import { OWNER_LOTS } from "../../data";
+import { useOwnerLots } from "../../hooks/useOwnerData";
+import { SkeletonList } from "../../components/Skeleton";
 
 const ACTIVITY = [
   { plate: "30A-123.45", action: "vào", time: "14:23", gate: "Cổng vào A" },
@@ -20,9 +21,26 @@ function fmt(n: number) {
 export default function OwnerLotDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const lot = OWNER_LOTS.find(l => l.id === Number(id)) ?? OWNER_LOTS[0];
-  const [status, setStatus] = useState<typeof lot["status"]>(lot.status);
+  const { data: ownerLots = [], isLoading } = useOwnerLots();
+  const lot = ownerLots.find((l) => l.id === Number(id));
+  const [status, setStatus] = useState<"open" | "closed" | "maintenance">(lot?.status ?? "open");
   const [editMode, setEditMode] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col" style={{ height: "100dvh" }}>
+        <div className="h-48 bg-slate-200 animate-pulse" />
+        <div className="p-4"><SkeletonList n={3} /></div>
+      </div>
+    );
+  }
+  if (!lot) {
+    return (
+      <div className="flex items-center justify-center h-dvh">
+        <p className="text-slate-400 font-semibold">Không tìm thấy bãi xe</p>
+      </div>
+    );
+  }
   const pct = lot.total > 0 ? Math.round((lot.occupied / lot.total) * 100) : 0;
   const barColor = pct >= 90 ? "#ef4444" : pct >= 70 ? "#f59e0b" : "#22c55e";
 

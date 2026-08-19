@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { useApp } from "../../context/AppContext";
-import { OWNER_LOTS } from "../../data";
+import { useOwnerLots } from "../../hooks/useOwnerData";
 
 const MENU_GROUPS = [
   {
@@ -34,9 +34,12 @@ const MENU_GROUPS = [
 export default function OwnerProfilePage() {
   const navigate = useNavigate();
   const { setRole } = useApp();
-  const totalSlots = OWNER_LOTS.reduce((s, l) => s + l.total, 0);
-  const avgRating  = (OWNER_LOTS.reduce((s, l) => s + l.rating, 0) / OWNER_LOTS.length).toFixed(1);
-  const monthRev   = OWNER_LOTS.reduce((s, l) => s + l.monthRevenue, 0);
+  const { data: ownerLots = [] } = useOwnerLots();
+  const totalSlots = ownerLots.reduce((s, l) => s + l.total, 0);
+  const avgRating  = ownerLots.length > 0
+    ? (ownerLots.reduce((s, l) => s + l.rating, 0) / ownerLots.length).toFixed(1)
+    : "–";
+  const monthRev   = ownerLots.reduce((s, l) => s + l.monthRevenue, 0);
 
   return (
     <div className="flex flex-col" style={{ height: "100dvh" }}>
@@ -70,7 +73,7 @@ export default function OwnerProfilePage() {
       {/* Stats strip */}
       <div className="flex bg-white border-b border-slate-100 divide-x divide-slate-100 flex-shrink-0">
         {[
-          { v: OWNER_LOTS.length.toString(), l: "Bãi xe" },
+          { v: ownerLots.length.toString(), l: "Bãi xe" },
           { v: totalSlots.toString(),        l: "Tổng chỗ" },
           { v: `${avgRating}★`,              l: "Đánh giá" },
           { v: monthRev >= 1_000_000 ? `${(monthRev / 1_000_000).toFixed(0)}M₫` : `${Math.round(monthRev / 1000)}K₫`, l: "Tháng này" },

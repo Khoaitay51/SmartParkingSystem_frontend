@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { TRANSACTIONS } from "../data";
+import { useTransactions } from "../hooks/useTransactions";
 import { BackBtnLight } from "../components/BackBtn";
 import { TxRow } from "../components/TxRow";
+import { SkeletonList } from "../components/Skeleton";
 
 type Filter = "all" | "parking" | "topup";
 
 export default function HistoryPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Filter>("all");
-  const filtered = TRANSACTIONS.filter((t) => tab === "all" || t.type === tab);
+  const { data: transactions = [], isLoading } = useTransactions();
+  const filtered = transactions.filter((t) => tab === "all" || t.type === tab);
 
   return (
     <div className="flex flex-col" style={{ height: "100dvh" }}>
@@ -32,11 +34,15 @@ export default function HistoryPage() {
         </div>
       </div>
       <div className="flex-1 page-scroll px-4 pt-3 pb-6">
-        <div className="card-sm overflow-hidden">
-          {filtered.map((tx, i) => (
-            <TxRow key={tx.id} tx={tx} last={i === filtered.length - 1} />
-          ))}
-        </div>
+        {isLoading ? (
+          <SkeletonList n={5} />
+        ) : (
+          <div className="card-sm overflow-hidden">
+            {filtered.map((tx, i) => (
+              <TxRow key={tx.id} tx={tx} last={i === filtered.length - 1} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

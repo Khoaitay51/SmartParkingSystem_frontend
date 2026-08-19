@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { LOTS } from "../data";
+import { useLots } from "../hooks/useLots";
 import { LotCard } from "../components/LotCard";
+import { SkeletonList } from "../components/Skeleton";
 import { Ic } from "../components/icons";
 
 export default function SearchPage() {
   const navigate = useNavigate();
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<"all" | "available" | "cheap">("all");
+  const { data: lots = [], isLoading } = useLots();
 
-  const filtered = LOTS.filter((l) =>
+  const filtered = lots.filter((l) =>
     (q === "" || l.name.toLowerCase().includes(q.toLowerCase()) || l.address.toLowerCase().includes(q.toLowerCase())) &&
     (filter === "all" || (filter === "available" && l.free > 0) || (filter === "cheap" && l.price <= 5500))
   );
@@ -32,7 +34,7 @@ export default function SearchPage() {
           { t: "42%", l: "78%", i: 2 },
           { t: "66%", l: "44%", i: 3 },
         ].map((pin, idx) => {
-          const lot = LOTS[pin.i];
+          const lot = lots[pin.i];
           return (
             <div
               key={idx}
@@ -88,7 +90,9 @@ export default function SearchPage() {
 
       {/* List */}
       <div className="flex-1 page-scroll px-4 pt-3 pb-24 space-y-3">
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <SkeletonList n={4} />
+        ) : filtered.length === 0 ? (
           <div className="text-center py-12">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-3">
               <div className="w-8 h-8 text-slate-300">{Ic.search}</div>

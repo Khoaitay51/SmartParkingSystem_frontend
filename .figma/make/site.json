@@ -1,0 +1,10 @@
+{
+  "description": "This smart parking ecosystem allows owners to register parking spaces and users to book spots, streamlining payments and enhancing convenience for both parties.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}

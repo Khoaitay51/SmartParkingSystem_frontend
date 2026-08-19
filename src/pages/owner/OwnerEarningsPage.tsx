@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { OWNER_TRANSACTIONS, WEEKLY_REVENUE, OWNER_LOTS } from "../../data";
-
-const MAX_BAR = Math.max(...WEEKLY_REVENUE.map((d) => d.v));
+import { useOwnerLots, useOwnerTransactions, useWeeklyRevenue } from "../../hooks/useOwnerData";
+import { SkeletonList } from "../../components/Skeleton";
 
 function fmt(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(".0", "") + "M₫";
@@ -15,12 +14,17 @@ export default function OwnerEarningsPage() {
   const [tab, setTab] = useState<"all" | "income" | "withdrawal">("all");
   const [showBalance, setShowBalance] = useState(true);
 
-  const totalBalance = 18_750_000;
-  const monthIncome  = OWNER_LOTS.reduce((s, l) => s + l.monthRevenue, 0);
-  const monthOut     = 5_000_000;
-  const weekTotal    = WEEKLY_REVENUE.reduce((s, d) => s + d.v, 0);
+  const { data: ownerLots = [] } = useOwnerLots();
+  const { data: ownerTransactions = [], isLoading: txLoading } = useOwnerTransactions();
+  const { data: weeklyRevenue = [] } = useWeeklyRevenue();
 
-  const filtered = OWNER_TRANSACTIONS.filter((tx) =>
+  const MAX_BAR = Math.max(...weeklyRevenue.map((d) => d.v), 1);
+  const totalBalance = 18_750_000;
+  const monthIncome  = ownerLots.reduce((s, l) => s + l.monthRevenue, 0);
+  const monthOut     = ownerTransactions.filter((t) => t.type === "withdrawal").reduce((s, t) => s + Math.abs(t.amount), 0);
+  const weekTotal    = weeklyRevenue.reduce((s, d) => s + d.v, 0);
+
+  const filtered = ownerTransactions.filter((tx) =>
     tab === "all" || tx.type === tab
   );
 
@@ -86,7 +90,7 @@ export default function OwnerEarningsPage() {
             <span className="text-[11px] text-slate-400 font-semibold">Tuần này</span>
           </div>
           <div className="flex items-end gap-1.5" style={{ height: 80 }}>
-            {WEEKLY_REVENUE.map((d) => {
+            {weeklyRevenue.map((d) => {
               const h = Math.round((d.v / MAX_BAR) * 68);
               return (
                 <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5">
@@ -113,7 +117,7 @@ export default function OwnerEarningsPage() {
         {/* Per-lot breakdown */}
         <div className="mx-4 mt-4 card-sm p-4">
           <h3 className="font-black text-slate-800 text-sm mb-3">Doanh thu theo bãi — tháng này</h3>
-          {OWNER_LOTS.map((lot) => {
+          {ownerLots.map((lot) => {
             const pct = Math.round((lot.monthRevenue / monthIncome) * 100);
             return (
               <div key={lot.id} className="mb-3 last:mb-0">

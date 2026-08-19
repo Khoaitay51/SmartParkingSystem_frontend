@@ -1,21 +1,40 @@
 import { useNavigate, useParams } from "react-router";
-import { LOTS } from "../data";
+import { useLot } from "../hooks/useLots";
 import { useApp } from "../context/AppContext";
 import { BackBtn } from "../components/BackBtn";
 import { Ic } from "../components/icons";
 import { GateButton } from "../components/GateButton";
+import { SkeletonList } from "../components/Skeleton";
 
 export default function ParkingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate  = useNavigate();
   const { startParking } = useApp();
+  const { data: lot, isLoading } = useLot(Number(id));
 
-  const lot = LOTS.find((l) => l.id === Number(id)) ?? LOTS[0];
+  if (isLoading) {
+    return (
+      <div className="flex flex-col" style={{ height: "100dvh" }}>
+        <div className="h-64 bg-slate-200 animate-pulse" />
+        <div className="p-4">
+          <SkeletonList n={3} />
+        </div>
+      </div>
+    );
+  }
+
+  if (!lot) {
+    return (
+      <div className="flex items-center justify-center h-dvh">
+        <p className="text-slate-400 font-semibold">Không tìm thấy bãi xe</p>
+      </div>
+    );
+  }
   const pct = Math.round(((lot.total - lot.free) / lot.total) * 100);
   const isFull = lot.free === 0;
 
   function handleStart() {
-    startParking(lot);
+    startParking(lot!);
     navigate("/driver/home");
   }
 

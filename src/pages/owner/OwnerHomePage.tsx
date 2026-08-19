@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import type { OwnerLot } from "../../types";
-import { OWNER_LOTS, OWNER_TRANSACTIONS, WEEKLY_REVENUE } from "../../data";
-
-const MAX_BAR = Math.max(...WEEKLY_REVENUE.map((d) => d.v));
+import { useOwnerLots, useOwnerTransactions, useWeeklyRevenue } from "../../hooks/useOwnerData";
+import { SkeletonList } from "../../components/Skeleton";
 
 function fmt(n: number) {
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1).replace(".0", "") + "M₫";
@@ -56,9 +55,14 @@ function OccupancyBar({ lot }: { lot: OwnerLot }) {
 export default function OwnerHomePage() {
   const navigate = useNavigate();
   const [showBalance, setShowBalance] = useState(true);
-  const todayTotal = OWNER_LOTS.reduce((s, l) => s + l.todayRevenue, 0);
-  const weekTotal  = WEEKLY_REVENUE.reduce((s, d) => s + d.v, 0);
-  const monthTotal = OWNER_LOTS.reduce((s, l) => s + l.monthRevenue, 0);
+  const { data: ownerLots = [] } = useOwnerLots();
+  const { data: ownerTransactions = [] } = useOwnerTransactions();
+  const { data: weeklyRevenue = [] } = useWeeklyRevenue();
+
+  const MAX_BAR = Math.max(...weeklyRevenue.map((d) => d.v), 1);
+  const todayTotal = ownerLots.reduce((s, l) => s + l.todayRevenue, 0);
+  const weekTotal  = weeklyRevenue.reduce((s, d) => s + d.v, 0);
+  const monthTotal = ownerLots.reduce((s, l) => s + l.monthRevenue, 0);
 
   return (
     <div className="flex flex-col" style={{ height: "100dvh" }}>
@@ -123,7 +127,7 @@ export default function OwnerHomePage() {
             <span className="text-xs text-blue-600 font-bold tap" onClick={() => navigate("/owner/earnings")}>Chi tiết →</span>
           </div>
           <div className="flex items-end justify-between gap-1" style={{ height: 64 }}>
-            {WEEKLY_REVENUE.map((d) => {
+            {weeklyRevenue.map((d) => {
               const h = Math.round((d.v / MAX_BAR) * 56);
               return (
                 <div key={d.day} className="flex-1 flex flex-col items-center gap-1">
@@ -172,7 +176,7 @@ export default function OwnerHomePage() {
             <span className="text-xs text-blue-600 font-bold tap" onClick={() => navigate("/owner/lots")}>Xem tất cả →</span>
           </div>
           <div className="space-y-3">
-            {OWNER_LOTS.map((lot) => (
+            {ownerLots.map((lot) => (
               <div key={lot.id} onClick={() => navigate("/owner/lots/" + lot.id)}>
                 <OccupancyBar lot={lot} />
               </div>
@@ -187,7 +191,7 @@ export default function OwnerHomePage() {
             <span className="text-xs text-blue-600 font-bold tap" onClick={() => navigate("/owner/earnings")}>Xem tất cả →</span>
           </div>
           <div className="card-sm overflow-hidden">
-            {OWNER_TRANSACTIONS.slice(0, 5).map((tx, i) => (
+            {ownerTransactions.slice(0, 5).map((tx, i) => (
               <div key={tx.id}>
                 {i > 0 && <div className="sep mx-4" />}
                 <div className="flex items-center gap-3 px-4 py-3">

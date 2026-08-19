@@ -1,10 +1,12 @@
 import { useNavigate } from "react-router";
-import { LOTS } from "../../data";
+import { useLots } from "../../hooks/useLots";
 import { LotCard } from "../../components/LotCard";
+import { SkeletonList } from "../../components/Skeleton";
 import { Ic } from "../../components/icons";
 
 export default function HomeIdleSection() {
   const navigate = useNavigate();
+  const { data: lots = [], isLoading } = useLots();
   return (
     <>
       {/* Empty-state banner */}
@@ -49,7 +51,7 @@ export default function HomeIdleSection() {
         <span className="text-xs text-green-600 font-bold tap" onClick={() => navigate("/driver/search")}>Xem tất cả</span>
       </div>
       <div className="px-4 space-y-3">
-        {LOTS.slice(0, 3).map((lot) => (
+        {isLoading ? <SkeletonList n={3} /> : lots.slice(0, 3).map((lot) => (
           <LotCard key={lot.id} lot={lot} onClick={() => navigate("/driver/lot/" + lot.id)} />
         ))}
       </div>
@@ -58,7 +60,7 @@ export default function HomeIdleSection() {
       <div className="px-4 mt-5">
         <h3 className="font-black text-slate-800 text-base mb-3">Hay gửi xe ở</h3>
         <div className="flex gap-3 overflow-x-auto pb-1">
-          {LOTS.slice(0, 3).map((lot) => (
+          {lots.slice(0, 3).map((lot) => (
             <div
               key={lot.id}
               className="flex-shrink-0 card-sm p-3 tap"

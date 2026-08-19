@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useApp } from "../../context/AppContext";
-import { TRANSACTIONS } from "../../data";
+import { useTransactions } from "../../hooks/useTransactions";
 import { Ic } from "../../components/icons";
 import { TxRow } from "../../components/TxRow";
+import { SkeletonCard } from "../../components/Skeleton";
 import HomeIdleSection from "./HomeIdleSection";
 import HomeActiveSection from "./HomeActiveSection";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const { appState } = useApp();
+  const { data: transactions = [], isLoading: txLoading } = useTransactions();
   const [balanceVis, setBalanceVis] = useState(true);
 
   return (
@@ -99,9 +101,12 @@ export default function HomePage() {
         </span>
       </div>
       <div className="card-sm mx-4 overflow-hidden">
-        {TRANSACTIONS.slice(0, 4).map((tx, i) => (
-          <TxRow key={tx.id} tx={tx} last={i === 3} />
-        ))}
+        {txLoading
+          ? Array(4).fill(0).map((_, i) => <SkeletonCard key={i} />)
+          : transactions.slice(0, 4).map((tx, i) => (
+              <TxRow key={tx.id} tx={tx} last={i === transactions.slice(0, 4).length - 1} />
+            ))
+        }
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import type { AppState } from "../../types";
-import { LOTS } from "../../data";
+import { useLots } from "../../hooks/useLots";
 import { LotCard } from "../../components/LotCard";
 import { Ic } from "../../components/icons";
 import { pad } from "../../utils";
@@ -12,6 +12,7 @@ interface Props {
 
 export default function HomeActiveSection({ appState }: Props) {
   const navigate = useNavigate();
+  const { data: lots = [] } = useLots();
   const [elapsed, setElapsed] = useState(5077);
 
   useEffect(() => {
@@ -91,7 +92,7 @@ export default function HomeActiveSection({ appState }: Props) {
         <span className="text-xs text-green-600 font-bold tap" onClick={() => navigate("/driver/search")}>Xem tất cả</span>
       </div>
       <div className="px-4 space-y-3">
-        {LOTS.filter((l) => l.id !== appState.activeLot?.id).slice(0, 2).map((lot) => (
+        {lots.filter((l) => l.id !== appState.activeLot?.id).slice(0, 2).map((lot) => (
           <LotCard key={lot.id} lot={lot} onClick={() => navigate("/driver/lot/" + lot.id)} />
         ))}
       </div>
