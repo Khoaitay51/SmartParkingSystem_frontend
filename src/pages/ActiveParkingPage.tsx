@@ -58,7 +58,7 @@ export default function ActiveParkingPage() {
             </div>
           ))}
         </div>
-        <button className="btn-brand w-full" onClick={() => { endParking(); navigate("/driver/home"); }}>
+        <button className="btn-brand w-full" onClick={() => { endParking(cost); navigate("/driver/home"); }}>
           Về trang chủ
         </button>
       </div>

@@ -28,11 +28,15 @@ import OwnerEarningsPage    from "../pages/owner/OwnerEarningsPage";
 import OwnerWithdrawPage    from "../pages/owner/OwnerWithdrawPage";
 import OwnerGatePage        from "../pages/owner/OwnerGatePage";
 import OwnerProfilePage     from "../pages/owner/OwnerProfilePage";
+import { OcrNotificationBanner } from "../components/OcrNotificationBanner";
 
 function Root({ children }: { children: React.ReactNode }) {
   return (
     <AppProvider>
-      <div className="phone-frame">{children}</div>
+      <div className="phone-frame">
+        <OcrNotificationBanner />
+        {children}
+      </div>
     </AppProvider>
   );
 }

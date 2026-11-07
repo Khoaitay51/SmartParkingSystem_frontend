@@ -6,14 +6,16 @@ interface GateButtonProps {
   mode: "entry" | "exit";
   disabled?: boolean;
   onOpened?: () => void;
+  onTrigger?: () => void | Promise<void | boolean>;
 }
 
-const GATE_OPEN_DURATION = 12; // seconds gate stays open
+const GATE_OPEN_DURATION = 8; // seconds gate stays open
 
-export function GateButton({ mode, disabled = false, onOpened }: GateButtonProps) {
+export function GateButton({ mode, disabled = false, onOpened, onTrigger }: GateButtonProps) {
   const [gateState, setGateState] = useState<GateState>("closed");
   const [countdown, setCountdown] = useState(GATE_OPEN_DURATION);
   const [progress, setProgress] = useState(0);
+  const [sending, setSending] = useState(false);
 
   // Opening animation — progress bar over 1.5s
   useEffect(() => {
@@ -48,8 +50,17 @@ export function GateButton({ mode, disabled = false, onOpened }: GateButtonProps
     return () => clearTimeout(t);
   }, [gateState]);
 
-  function handlePress() {
-    if (disabled || gateState !== "closed") return;
+  async function handlePress() {
+    if (disabled || sending || gateState !== "closed") return;
+    if (onTrigger) {
+      setSending(true);
+      try {
+        await onTrigger();
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
     setProgress(0);
     setGateState("opening");
   }
@@ -62,7 +73,7 @@ export function GateButton({ mode, disabled = false, onOpened }: GateButtonProps
     return (
       <button
         onClick={handlePress}
-        disabled={disabled}
+        disabled={disabled || sending}
         className="w-full rounded-2xl flex flex-col items-center gap-2 py-5 transition-all tap"
         style={{
           background: disabled ? "#f1f5f9" : "linear-gradient(135deg,#f0fdf6,#dcfce8)",
@@ -76,7 +87,7 @@ export function GateButton({ mode, disabled = false, onOpened }: GateButtonProps
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 text-green-600">{Ic.gate}</div>
           <span className="text-green-800 font-black text-base" style={{ fontFamily: "Nunito" }}>
-            {label}
+            {sending ? "Đang gửi lệnh…" : label}
           </span>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-green-600 font-medium">

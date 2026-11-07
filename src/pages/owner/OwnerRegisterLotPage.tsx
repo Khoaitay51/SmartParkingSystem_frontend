@@ -27,6 +27,8 @@ function StepIndicator({ step, total }: { step: number; total: number }) {
   );
 }
 
+import { registerNewLot } from "../../services/api";
+
 export default function OwnerRegisterLotPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
@@ -339,7 +341,17 @@ export default function OwnerRegisterLotPage() {
             className="btn-owner flex-1"
             onClick={() => {
               if (step < 3) setStep((s) => s + 1);
-              else setDone(true);
+              else {
+                const total = (parseInt(form.carSlots) || 0) + (parseInt(form.motoSlots) || 0);
+                registerNewLot({
+                  name: form.name || "Bãi xe mới",
+                  address: form.address || "Hà Nội",
+                  totalSlots: total > 0 ? total : 4,
+                  priceHour: Number(form.priceHour) || 5000,
+                  priceDay: Number(form.priceDay) || 60000,
+                  features: form.features,
+                }).finally(() => setDone(true));
+              }
             }}
           >
             {step < 3 ? "Tiếp theo →" : "Gửi đăng ký 🎉"}

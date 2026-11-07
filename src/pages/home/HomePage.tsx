@@ -1,17 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useApp } from "../../context/AppContext";
-import { useTransactions } from "../../hooks/useTransactions";
 import { Ic } from "../../components/icons";
 import { TxRow } from "../../components/TxRow";
-import { SkeletonCard } from "../../components/Skeleton";
 import HomeIdleSection from "./HomeIdleSection";
 import HomeActiveSection from "./HomeActiveSection";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const { appState } = useApp();
-  const { data: transactions = [], isLoading: txLoading } = useTransactions();
+  const { appState, balance, transactions, currentUser } = useApp();
   const [balanceVis, setBalanceVis] = useState(true);
 
   return (
@@ -21,7 +18,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-white/60 text-xs font-semibold">Xin chào 👋</p>
-            <h2 className="text-white font-black text-xl leading-tight">Nguyễn Văn An</h2>
+            <h2 className="text-white font-black text-xl leading-tight">{currentUser.name}</h2>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative tap" onClick={() => navigate("/driver/notifications")}>
@@ -33,8 +30,8 @@ export default function HomePage() {
               </div>
             </div>
             <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&auto=format"
-              alt="avatar"
+              src={currentUser.avatar}
+              alt={currentUser.name}
               className="w-10 h-10 rounded-full object-cover border-2 border-white/30"
             />
           </div>
@@ -51,7 +48,7 @@ export default function HomePage() {
           <div className="flex items-end justify-between">
             <div>
               <p className="text-white text-3xl font-black mono leading-none">
-                {balanceVis ? "660.000 ₫" : "•••.••• ₫"}
+                {balanceVis ? `${balance.toLocaleString()} ₫` : "•••.••• ₫"}
               </p>
               <p className="text-white/40 text-[11px] mt-1">Cập nhật vừa xong</p>
             </div>
@@ -101,12 +98,9 @@ export default function HomePage() {
         </span>
       </div>
       <div className="card-sm mx-4 overflow-hidden">
-        {txLoading
-          ? Array(4).fill(0).map((_, i) => <SkeletonCard key={i} />)
-          : transactions.slice(0, 4).map((tx, i) => (
-              <TxRow key={tx.id} tx={tx} last={i === transactions.slice(0, 4).length - 1} />
-            ))
-        }
+        {transactions.slice(0, 4).map((tx, i) => (
+          <TxRow key={tx.id} tx={tx} last={i === Math.min(transactions.length, 4) - 1} />
+        ))}
       </div>
     </div>
   );

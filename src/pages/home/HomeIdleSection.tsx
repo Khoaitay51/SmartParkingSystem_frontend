@@ -1,12 +1,21 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useLots } from "../../hooks/useLots";
 import { LotCard } from "../../components/LotCard";
 import { SkeletonList } from "../../components/Skeleton";
 import { Ic } from "../../components/icons";
+import { subscribeToParkingLot, type ParkingLotData } from "../../services/firebase";
 
 export default function HomeIdleSection() {
   const navigate = useNavigate();
-  const { data: lots = [], isLoading } = useLots();
+  const { data: catalog = [], isLoading } = useLots();
+  const [live, setLive] = useState<ParkingLotData | null>(null);
+
+  useEffect(() => subscribeToParkingLot(setLive), []);
+
+  const lots = catalog.map((lot) =>
+    live && lot.id === 1 ? { ...lot, free: live.freeSlots, total: live.totalSlots } : lot
+  );
   return (
     <>
       {/* Empty-state banner */}

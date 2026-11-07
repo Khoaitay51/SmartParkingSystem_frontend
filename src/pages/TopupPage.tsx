@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import { BackBtn } from "../components/BackBtn";
 import { Ic } from "../components/icons";
+import { useApp } from "../context/AppContext";
 
 type Step = "form" | "confirm" | "done";
 
@@ -14,6 +15,7 @@ const METHODS: Record<string, string> = {
 
 export default function TopupPage() {
   const navigate = useNavigate();
+  const { balance, topup } = useApp();
   const [amount, setAmount] = useState("");
   const [method, setMethod] = useState("vnpay");
   const [step, setStep] = useState<Step>("form");
@@ -23,8 +25,12 @@ export default function TopupPage() {
 
   function handleNext() {
     if (!canProceed) return;
-    if (step === "form") setStep("confirm");
-    else setStep("done");
+    if (step === "form") {
+      setStep("confirm");
+    } else {
+      topup(parsedAmount, METHODS[method] || "VNPAY");
+      setStep("done");
+    }
   }
 
   if (step === "done") {
@@ -43,7 +49,7 @@ export default function TopupPage() {
         <p className="text-slate-400 text-xs mb-8">
           Số dư mới:{" "}
           <span className="font-black text-slate-700 mono">
-            {(660000 + parsedAmount).toLocaleString()} ₫
+            {balance.toLocaleString()} ₫
           </span>
         </p>
         <button className="btn-brand w-full max-w-xs" onClick={() => navigate(-1 as unknown as string)}>
@@ -61,7 +67,7 @@ export default function TopupPage() {
           <h2 className="text-xl font-black text-white">Nạp tiền ví</h2>
         </div>
         <p className="text-white/60 text-sm ml-1">
-          Số dư hiện tại: <span className="font-black text-white">660.000 ₫</span>
+          Số dư hiện tại: <span className="font-black text-white">{balance.toLocaleString()} ₫</span>
         </p>
       </div>
 

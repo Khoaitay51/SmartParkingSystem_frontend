@@ -32,7 +32,7 @@ const MENU_GROUPS = [
 
 export default function ProfilePage() {
   const navigate = useNavigate();
-  const { setRole } = useApp();
+  const { setRole, currentUser, balance } = useApp();
   return (
     <div className="flex flex-col" style={{ height: "100dvh" }}>
       {/* Header */}
@@ -40,8 +40,8 @@ export default function ProfilePage() {
         <div className="flex items-center gap-4">
           <div className="relative">
             <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&auto=format"
-              alt="avatar"
+              src={currentUser.avatar}
+              alt={currentUser.name}
               className="rounded-2xl object-cover border-2 border-white/30"
               style={{ width: 72, height: 72 }}
             />
@@ -50,8 +50,8 @@ export default function ProfilePage() {
             </div>
           </div>
           <div>
-            <h2 className="text-xl font-black text-white">Nguyễn Văn An</h2>
-            <p className="text-white/60 text-sm">+84 912 345 678</p>
+            <h2 className="text-xl font-black text-white">{currentUser.name}</h2>
+            <p className="text-white/60 text-sm">{currentUser.phone}</p>
             <div
               className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold"
               style={{ background: "rgba(255,255,255,0.18)", color: "#dcfce8" }}
@@ -68,7 +68,7 @@ export default function ProfilePage() {
         {[
           { v: "47",    l: "Lượt gửi" },
           { v: "4.9★",  l: "Đánh giá" },
-          { v: "660K₫", l: "Số dư" },
+          { v: `${Math.round(balance / 1000)}K₫`, l: "Số dư" },
         ].map((s) => (
           <div key={s.l} className="flex-1 py-3 text-center">
             <p className="text-sm font-black text-slate-800 mono">{s.v}</p>
